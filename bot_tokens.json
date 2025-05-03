@@ -1,13 +1,19 @@
 {
-  "password": "annas",
+  "tokens": [
+    {
+      "token": "token",
+      "expired": "2025-12-31"
+    },
+    {
+      "token": "token",
+      "expired": "2025-06-30"
+    }
+  ],
   "danger": false,
   "upgrade": false,
-  "expired": "2025-12-31",
-  "tokens": [
-    "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew1"
-  ],
+  "password": "annas",
   "allowed_numbers": {
-    "6285768351775": "2025-12-31",
-    "6281234567890": "2025-06-01"
+    "628123456789": "2025-12-31",
+    "628987654321": "2025-07-31"
   }
 }
