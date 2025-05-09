@@ -1,7 +1,16 @@
 {
   "tokens": [
-    "7525529914:AAHXFqgcdU8jJAqLVnZH0yWPjU8ggsNePeo",
-    "7876228166:AAESfweBPxjNfy9mdXChGhCVQoe7BRsyvDo",
-    "token_3"
+    {
+      "token": "your-bot-token-1",
+      "expiry": "05-2025"
+    },
+    {
+      "token": "your-bot-token-2",
+      "expiry": "06-2025"
+    },
+    {
+      "token": "your-bot-token-3",
+      "expiry": "07-2025"
+    }
   ]
 }
