@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini ChatBot Ultimate</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #1f1f1f;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #00e5ff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    #chatBox {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #181818;
+    }
+    .msg {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      position: relative;
+      line-height: 1.4;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    .user { align-self: flex-end; background: #1e88e5; }
+    .bot  { align-self: flex-start; background: #2e7d32; }
+    .centang {
+      font-size: 12px;
+      color: #00e5ff;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .sender-label {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    #inputArea {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10px;
+      background: #1f1f1f;
+      gap: 10px;
+    }
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: #2c2c2c;
+      color: white;
+    }
+    #sendBtn, #uploadBtn {
+      background: #00e5ff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
+    }
+    #sendBtn:hover, #uploadBtn:hover {
+      background: #00bcd4;
+    }
+    #typingIndicator {
+      font-style: italic;
+      font-size: 13px;
+      margin-left: 12px;
+      color: #aaa;
+      display: none;
+    }
+    img.chat-image {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 5px;
+    }
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #000;
+    }
+    .login-box {
+      background: #222;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #00e5ff;
+      text-align: center;
+    }
+    .login-box input {
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+      background: #333;
+      color: white;
+    }
+    .login-box button {
+      background: #00e5ff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="login-container" id="loginPage">
+  <div class="login-box">
+    <h2>Masuk Gemini Chat</h2>
+    <input type="text" id="username" placeholder="Masukkan Username" />
+    <input type="password" id="password" placeholder="Masukkan Password" />
+    <button onclick="login()">Masuk</button>
+    <p style="color:red;display:none" id="error">Username atau Password salah</p>
+  </div>
+</div>
+<div id="chatApp" style="display:none">
+  <header>💬 Chat dengan Gemini (API)</header>
+  <div id="chatBox"></div>
+  <div id="typingIndicator">Gemini sedang mengetik...</div>
+  <div id="inputArea">
+    <input type="text" id="messageInput" placeholder="Tulis pesan..." />
+    <input type="file" id="imageInput" accept="image/*" style="display:none;" />
+    <button id="uploadBtn">📷</button>
+    <button id="sendBtn">Kirim</button>
+  </div>
+</div>
+<audio id="typeSound" src="https://freesound.org/data/previews/69/69597_634166-lq.mp3" preload="auto"></audio>
+<script>
+  const loginPage = document.getElementById("loginPage");
+  const chatApp = document.getElementById("chatApp");
+  const error = document.getElementById("error");
+  function login() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    if (u === "anas" && p === "anas") {
+      loginPage.style.display = "none";
+      chatApp.style.display = "block";
+    } else {
+      error.style.display = "block";
+    }
+  }
+
+  const chatBox = document.getElementById("chatBox");
+  const input = document.getElementById("messageInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const imageInput = document.getElementById("imageInput");
+  const typing = document.getElementById("typingIndicator");
+  const typeSound = document.getElementById("typeSound");
+
+  const GEMINI_API_KEY = 'AIzaSyBYmsmqVHHnio0i7TOLAXmYSsU3UNOhd3o';
+  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+  let suara = new SpeechSynthesisUtterance(); suara.lang = 'id-ID';
+
+  input.addEventListener("input", () => { typeSound.currentTime = 0; typeSound.play(); });
+
+  function renderPesan(sender, content, isImg = false) {
+    const msg = document.createElement("div");
+    msg.className = `msg ${sender}`;
+    const label = document.createElement("div");
+    label.className = "sender-label";
+    label.textContent = sender === "user" ? "Kamu" : "Gemini";
+    const body = document.createElement("div");
+    if (isImg) {
+      const img = document.createElement("img");
+      img.src = content;
+      img.className = "chat-image";
+      body.appendChild(img);
+    } else {
+      body.innerHTML = content + ' <span class="centang">✔️</span>';
+    }
+    msg.appendChild(label);
+    msg.appendChild(body);
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function simpan() {
+    localStorage.setItem("chatRiwayatGemini", chatBox.innerHTML);
+  }
+
+  function muat() {
+    const riwayat = localStorage.getItem("chatRiwayatGemini");
+    if (riwayat) chatBox.innerHTML = riwayat;
+  }
+
+  async function botBalas(teks) {
+    typing.style.display = "block";
+    try {
+      const res = await fetch(GEMINI_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: teks }] }] })
+      });
+      const data = await res.json();
+      const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, tidak merespon.";
+      typing.style.display = "none";
+      renderPesan("bot", botReply);
+      suara.text = botReply;
+      speechSynthesis.speak(suara);
+      simpan();
+    } catch (err) {
+      typing.style.display = "none";
+      renderPesan("bot", "⚠️ Gagal hubungi API.");
+    }
+  }
+
+  sendBtn.onclick = () => {
+    const txt = input.value.trim();
+    if (!txt) return;
+    renderPesan("user", txt);
+    input.value = "";
+    simpan();
+    botBalas(txt);
+  };
+
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
+  document.getElementById("uploadBtn").onclick = () => imageInput.click();
+
+  imageInput.onchange = () => {
+    const f = imageInput.files[0];
+    if (f) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        renderPesan("user", e.target.result, true);
+        simpan();
+        setTimeout(() => {
+          const reply = "📷 Gambar kamu bagus!";
+          renderPesan("bot", reply);
+          suara.text = reply;
+          speechSynthesis.speak(suara);
+          simpan();
+        }, 1500);
+      };
+      reader.readAsDataURL(f);
+    }
+  };
+
+  muat();
+</script>
+</body>
+</html>
