@@ -6,7 +6,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { margin: 0; background: #0c0c0f; color: #fff; }
+    body {
+      margin: 0;
+      background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
+      background-size: 600% 600%;
+      animation: backgroundWave 20s ease infinite;
+      color: #fff;
+    }
     a { color: #00e5ff; text-decoration: none; }
     .hidden { display: none; }
     .page { display: none; height: 100vh; width: 100vw; overflow: hidden; }
@@ -14,11 +20,10 @@
     .login-page, .register-page {
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #1e1e2f, #12121a);
       flex-direction: column;
     }
     .box {
-      background: #191923;
+      background: rgba(25,25,35,0.9);
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 25px #00e5ff55;
@@ -56,15 +61,18 @@
     }
     .chat-page {
       flex-direction: row;
-      background: #0c0c0f;
+      display: none;
+      height: 100vh;
+    }
+    .chat-page.active {
+      display: flex;
     }
     .sidebar {
       width: 260px;
-      background: #16161f;
+      background: rgba(20,20,30,0.9);
       border-right: 1px solid #2b2b3c;
       display: flex;
       flex-direction: column;
-      animation: fadeIn 0.5s ease;
     }
     .sidebar h3 {
       margin: 0;
@@ -98,13 +106,6 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #2b2b3c;
-      animation: fadeIn 0.3s ease;
-    }
-    .chat-header h4 {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
     .chat-box {
       flex: 1;
@@ -113,7 +114,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: #0c0c0f;
+      background: rgba(12,12,15,0.8);
     }
     .chat-input {
       padding: 15px;
@@ -121,7 +122,6 @@
       display: flex;
       gap: 10px;
       border-top: 1px solid #2b2b3c;
-      flex-wrap: wrap;
     }
     .chat-input input {
       flex: 1;
@@ -131,7 +131,7 @@
       background: #2b2b3c;
       color: white;
     }
-    .chat-input button, .chat-input label {
+    .chat-input button {
       background: #00e5ff;
       padding: 10px 14px;
       border-radius: 8px;
@@ -139,14 +139,6 @@
       color: black;
       font-weight: bold;
       cursor: pointer;
-    }
-    .chat-input label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .chat-input input[type="file"] {
-      display: none;
     }
     .msg {
       max-width: 60%;
@@ -174,150 +166,125 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes backgroundWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   </style>
 </head>
 <body>
-<!-- HALAMAN LOGIN -->
-<div class="page login-page active" id="loginPage">
-  <div class="box">
-    <h2>Masuk</h2>
-    <input type="text" id="loginUser" placeholder="Username">
-    <input type="password" id="loginPass" placeholder="Password">
-    <button onclick="login()">Masuk</button>
-    <a href="#" onclick="showRegister()">Daftar akun baru</a>
-  </div>
-</div>
-<!-- HALAMAN DAFTAR -->
-<div class="page register-page" id="registerPage">
-  <div class="box">
-    <h2>Daftar</h2>
-    <input type="text" id="regUser" placeholder="Buat Username">
-    <input type="password" id="regPass" placeholder="Buat Password">
-    <button onclick="register()">Daftar</button>
-    <a href="#" onclick="showLogin()">Kembali ke Login</a>
-  </div>
-</div>
-<!-- HALAMAN CHAT -->
-<div class="page chat-page" id="chatPage">
-  <div class="sidebar">
-    <h3>Pengguna</h3>
-    <div class="user-list" id="userList"></div>
-  </div>
-  <div class="chat-area">
-    <div class="chat-header">
-      <h4 id="chatWith">Gemini AI <span class="checkmark">✔️</span></h4>
-      <button onclick="logout()">Logout</button>
+  <div id="loginPage" class="page login-page active">
+    <div class="box">
+      <h2>Masuk</h2>
+      <input type="text" id="loginUser" placeholder="Username">
+      <input type="password" id="loginPass" placeholder="Password">
+      <button onclick="login()">Masuk</button>
+      <a href="#" onclick="switchPage('registerPage')">Daftar Akun Baru</a>
+      <p id="loginError" style="color: red; display: none;">❌ Username / Password salah</p>
     </div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Tulis pesan...">
-      <label>
-        📎<input type="file" id="fileInput" onchange="sendFile()">
-      </label>
-      <button onclick="sendMessage()">Kirim</button>
+  </div>  <div id="registerPage" class="page register-page">
+    <div class="box">
+      <h2>Daftar</h2>
+      <input type="text" id="regUser" placeholder="Buat Username">
+      <input type="password" id="regPass" placeholder="Buat Password">
+      <button onclick="register()">Daftar</button>
+      <a href="#" onclick="switchPage('loginPage')">Kembali ke Login</a>
+      <p id="registerError" style="color: red; display: none;">❌ Username sudah digunakan</p>
     </div>
-  </div>
-</div>
-<script>
-const API_KEY = "AIzaSyBYmsmqVHHnio0i7TOLAXmYSsU3UNOhd3o";
-let currentUser = "";
-let users = JSON.parse(localStorage.getItem("users") || "{}");
-function showRegister() {
-  document.getElementById("loginPage").classList.remove("active");
-  document.getElementById("registerPage").classList.add("active");
-}
-function showLogin() {
-  document.getElementById("registerPage").classList.remove("active");
-  document.getElementById("loginPage").classList.add("active");
-}
-function register() {
-  const u = document.getElementById("regUser").value.trim();
-  const p = document.getElementById("regPass").value;
-  if (users[u]) return alert("❌ Username sudah terdaftar!");
-  users[u] = { password: p };
-  localStorage.setItem("users", JSON.stringify(users));
-  alert("✅ Akun berhasil dibuat!");
-  showLogin();
-}
-function login() {
-  const u = document.getElementById("loginUser").value.trim();
-  const p = document.getElementById("loginPass").value;
-  if (!users[u] || users[u].password !== p) return alert("❌ Login gagal!");
-  currentUser = u;
-  document.getElementById("loginPage").classList.remove("active");
-  document.getElementById("chatPage").classList.add("active");
-  loadUsers();
-  loadMessages();
-}
-function logout() {
-  location.reload();
-}
-function loadUsers() {
-  const ul = document.getElementById("userList");
-  ul.innerHTML = `<div class='user-item' onclick="selectUser('Gemini')">Gemini <span class='checkmark'>✔️</span></div>`;
-  Object.keys(users).forEach(u => {
-    if (u !== currentUser) {
-      ul.innerHTML += `<div class='user-item' onclick="selectUser('${u}')">${u} ${u === 'annas' ? '<span class=\"checkmark\">✔️</span>' : ''}</div>`;
+  </div>  <div id="chatPage" class="chat-page">
+    <div class="sidebar">
+      <h3>👑 Pengguna</h3>
+      <div class="user-list" id="userList"></div>
+    </div>
+    <div class="chat-area">
+      <div class="chat-header">
+        <div id="chatWith">Chat</div>
+        <button onclick="logout()">Logout</button>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Tulis pesan...">
+        <button onclick="sendMessage()">Kirim</button>
+      </div>
+    </div>
+  </div>  <script>
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const chatLog = JSON.parse(localStorage.getItem('chatLog') || '{}');
+    let currentUser = null;
+
+    function saveUsers() {
+      localStorage.setItem('users', JSON.stringify(users));
     }
-  });
-}
-let chatTarget = "Gemini";
-function selectUser(u) {
-  chatTarget = u;
-  document.getElementById("chatWith").innerHTML = `${u} <span class='checkmark'>✔️</span>`;
-  loadMessages();
-}
-function renderMsg(sender, text) {
-  const box = document.getElementById("chatBox");
-  const msg = document.createElement("div");
-  msg.className = `msg ${sender === currentUser ? 'from-me' : 'from-bot'}`;
-  const label = `<div class='sender'>${sender} <span class='checkmark'>✔️</span></div>`;
-  msg.innerHTML = label + text;
-  box.appendChild(msg);
-  box.scrollTop = box.scrollHeight;
-}
-function saveMessage(from, text) {
-  const key = `chat_${currentUser}_${chatTarget}`;
-  const history = JSON.parse(localStorage.getItem(key) || "[]");
-  history.push({ from, text });
-  localStorage.setItem(key, JSON.stringify(history));
-}
-function loadMessages() {
-  const key = `chat_${currentUser}_${chatTarget}`;
-  const history = JSON.parse(localStorage.getItem(key) || "[]");
-  document.getElementById("chatBox").innerHTML = "";
-  history.forEach(({from, text}) => renderMsg(from, text));
-}
-async function sendMessage() {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  if (!text) return;
-  renderMsg(currentUser, text);
-  saveMessage(currentUser, text);
-  input.value = "";
-  if (chatTarget === "Gemini") {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text }] }] })
-    });
-    const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "(Gemini tidak merespon)";
-    renderMsg("Gemini", reply);
-    saveMessage("Gemini", reply);
-  }
-}
-function sendFile() {
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const text = `<a href='${reader.result}' target='_blank'>📎 ${file.name}</a>`;
-    renderMsg(currentUser, text);
-    saveMessage(currentUser, text);
-  };
-  reader.readAsDataURL(file);
-}
-</script>
-</body>
+    function saveChat() {
+      localStorage.setItem('chatLog', JSON.stringify(chatLog));
+    }
+    function switchPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function register() {
+      const u = document.getElementById('regUser').value.trim();
+      const p = document.getElementById('regPass').value;
+      if (users[u]) return document.getElementById('registerError').style.display = 'block';
+      users[u] = { password: p, premium: false };
+      saveUsers(); alert('✅ Berhasil daftar!'); switchPage('loginPage');
+    }
+    function login() {
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value;
+      if (u === 'annas' && p === 'annas') {
+        users[u] = { password: p, premium: true };
+      }
+      if (!users[u] || users[u].password !== p) return document.getElementById('loginError').style.display = 'block';
+      currentUser = u;
+      switchPage('chatPage');
+      loadUsers();
+      loadChat(currentUser);
+    }
+    function logout() {
+      location.reload();
+    }
+    function loadUsers() {
+      const list = document.getElementById('userList');
+      list.innerHTML = '';
+      Object.keys(users).forEach(u => {
+        const el = document.createElement('div');
+        el.className = 'user-item';
+        el.textContent = u + (u === 'annas' ? ' ✅' : '');
+        el.onclick = () => loadChat(u);
+        list.appendChild(el);
+      });
+    }
+    function loadChat(to) {
+      document.getElementById('chatWith').textContent = 'Chat dengan ' + to;
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML = '';
+      (chatLog[to] || []).forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (msg.from === currentUser ? 'from-me' : 'from-bot');
+        div.innerHTML = '<div class="sender">' + msg.from + (msg.from === 'annas' || msg.from === 'Gemini' ? ' <span class="checkmark">✔️</span>' : '') + '</div>' + msg.text;
+        chatBox.appendChild(div);
+      });
+    }
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim(); if (!text) return;
+      const to = document.getElementById('chatWith').textContent.split(' ')[2];
+      if (!chatLog[to]) chatLog[to] = [];
+      chatLog[to].push({ from: currentUser, text });
+      if (to === 'Gemini') {
+        const reply = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBYmsmqVHHnio0i7TOLAXmYSsU3UNOhd3o', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text }] }] })
+        });
+        const res = await reply.json();
+        const textReply = res?.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada balasan.';
+        chatLog[to].push({ from: 'Gemini', text: textReply });
+      }
+      input.value = '';
+      saveChat();
+      loadChat(to);
+    }
+  </script></body>
 </html>
