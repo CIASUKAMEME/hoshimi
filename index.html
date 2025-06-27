@@ -1,316 +1,214 @@
-<!DOCTYPE html><html lang="id">
+
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🔥 Gemini ChatBot Ultimate</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    * {box-sizing: border-box; font-family: 'Orbitron', sans-serif;}
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #000000, #0f2027);
-      color: white;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: #141414;
-      padding: 15px;
-      text-align: center;
-      font-size: 1.4rem;
-      color: #00e5ff;
-      font-weight: bold;
-      box-shadow: 0 2px 10px #00e5ff70;
-    }
-    #chatBox {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #0e0e0e url('https://www.transparenttextures.com/patterns/stardust.png');
-    }
-    .msg {
-      max-width: 75%;
-      padding: 10px 15px;
-      border-radius: 15px;
-      line-height: 1.5;
-      animation: fadeIn 0.3s ease;
-      word-wrap: break-word;
-    }
+    * { box-sizing: border-box; font-family: 'Orbitron', sans-serif; }
+    body { margin: 0; background: #000; color: #fff; height: 100vh; display: flex; flex-direction: column; }
+    .hidden { display: none; }
+    header { background: #111; padding: 15px; text-align: center; font-size: 1.4rem; color: #00e5ff; font-weight: bold; }
+    #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #0e0e0e; }
+    .msg { max-width: 75%; padding: 10px 15px; border-radius: 15px; line-height: 1.5; animation: fadeIn 0.3s ease; word-wrap: break-word; }
     .user { align-self: flex-end; background: #1e88e5; }
     .bot { align-self: flex-start; background: #2e7d32; }
     .sender-label { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(10px);}
-      to {opacity: 1; transform: translateY(0);}
+    #inputArea { display: flex; gap: 10px; padding: 10px; background: #1a1a1a; }
+    #messageInput { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #2c2c2c; color: white; }
+    button { padding: 10px 16px; border: none; border-radius: 10px; background: #00e5ff; color: black; font-weight: bold; cursor: pointer; }
+    button:hover { background: #00c5d4; }
+    .panel, .login-container, .register-container {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; background: #000;
     }
-    #inputArea {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      background: #1a1a1a;
-      border-top: 2px solid #00e5ff40;
+    .box {
+      background: #222; padding: 2rem; border-radius: 10px; box-shadow: 0 0 15px #00e5ff;
+      width: 300px; text-align: center;
     }
-    #messageInput {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      background: #2c2c2c;
-      color: white;
-    }
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 10px;
-      background: #00e5ff;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      background: #00c5d4;
-      transform: scale(1.05);
-    }
-    .login-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #000 url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
-    }
-    .login-box {
-      background: #222;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #00e5ff;
-      width: 300px;
-      text-align: center;
-    }
-    .login-box input {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      background: #333;
-      border: none;
-      border-radius: 5px;
-      color: white;
-    }
-    .error {
-      color: red;
-      font-size: 13px;
-      display: none;
-    }
-    #typingIndicator {
-      font-style: italic;
-      font-size: 12px;
-      padding-left: 15px;
-      color: #aaa;
-      display: none;
-    }
-    .glow-effect {
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-    @keyframes glow {
-      from { text-shadow: 0 0 5px #00e5ff, 0 0 10px #00e5ff; }
-      to { text-shadow: 0 0 20px #00e5ff, 0 0 30px #00e5ff; }
-    }
-    .badge {
-      display: inline-block;
-      background: gold;
-      color: black;
-      padding: 2px 6px;
-      font-size: 10px;
-      border-radius: 4px;
-      margin-left: 5px;
-    }
-    .toggle-container {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-    .toggle-container input {
-      width: 40px;
-      height: 20px;
-    }
-    /* BONUS: animasi ketik kursor */
-    .typing-anim::after {
-      content: '|';
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0%, 50% {opacity: 1;}
-      51%, 100% {opacity: 0;}
-    }
+    .box input { width: 100%; margin: 10px 0; padding: 10px; background: #333; border: none; border-radius: 5px; color: white; }
+    .error { color: red; font-size: 13px; display: none; }
+    #adminPanel table { width: 100%; color: white; margin-top: 20px; border-collapse: collapse; }
+    #adminPanel td, #adminPanel th { border: 1px solid #888; padding: 8px; text-align: center; }
+    #adminPanel th { background-color: #111; }
+    @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
   </style>
 </head>
 <body>
-  <div class="toggle-container">
-    <label style="font-size:12px">Dark Mode
-      <input type="checkbox" id="modeToggle" onchange="toggleDark()" checked />
-    </label>
+
+<!-- LOGIN PAGE -->
+<div class="login-container" id="loginPage">
+  <div class="box">
+    <h2>Login</h2>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <p><a href="#" onclick="showRegister()">Daftar Akun Baru</a></p>
+    <p id="loginError" class="error">❌ Username / Password salah!</p>
   </div>
-  <div class="login-container" id="loginPage">
-    <div class="login-box">
-      <h2 class="glow-effect">🔒 Login ChatBot</h2>
-      <input type="text" id="username" placeholder="Username"/>
-      <input type="password" id="password" placeholder="Password"/>
-      <input type="text" id="apikey" placeholder="API Key Gemini"/>
-      <button onclick="login()">Login</button>
-      <p id="loginError" class="error">❌ Username / Password / API salah!</p>
-    </div>
-  </div>  <div id="chatApp" style="display:none">
-    <header id="userStatus">Gemini ChatBot 🤖</header>
-    <div id="chatBox"></div>
-    <div id="typingIndicator" class="typing-anim">Gemini sedang mengetik...</div>
-    <div id="inputArea">
-      <input type="text" id="messageInput" placeholder="Tulis pesan...">
-      <button onclick="sendMessage()">Kirim</button>
-    </div>
-  </div><audio id="typeSound" src="https://freesound.org/data/previews/69/69597_634166-lq.mp3" preload="auto"></audio> <audio id="notifSound" src="https://freesound.org/data/previews/316/316847_4939433-lq.mp3" preload="auto"></audio>
+</div>
 
-  <script>
-    // Data user dan session
-    let USERS_DB = JSON.parse(localStorage.getItem("usersDB") || "[]");
-    let currentUser = null;
-    let isPremium = false;
-    let GEMINI_API_KEY = "";
-    const typeSound = document.getElementById("typeSound");
-    const notifSound = document.getElementById("notifSound");
-    const suara = new SpeechSynthesisUtterance();
-    suara.lang = 'id-ID';
+<!-- REGISTER PAGE -->
+<div class="register-container hidden" id="registerPage">
+  <div class="box">
+    <h2>Daftar</h2>
+    <input type="text" id="regUser" placeholder="Buat Username">
+    <input type="password" id="regPass" placeholder="Buat Password">
+    <button onclick="register()">Daftar</button>
+    <p><a href="#" onclick="showLogin()">Kembali ke Login</a></p>
+    <p id="registerError" class="error">❌ Username sudah digunakan!</p>
+  </div>
+</div>
 
-    function toggleDark() {
-      document.body.style.background = document.getElementById("modeToggle").checked ? 
-        'linear-gradient(135deg, #000000, #0f2027)' : '#ffffff';
-      document.body.style.color = document.getElementById("modeToggle").checked ? 'white' : 'black';
+<!-- ADMIN PANEL -->
+<div class="panel hidden" id="adminPanel">
+  <div class="box" style="width:80%;">
+    <h2>👑 Admin Panel</h2>
+    <table id="userTable">
+      <thead><tr><th>Username</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p><button onclick="logout()">Logout</button></p>
+  </div>
+</div>
+
+<!-- CHATBOT -->
+<div class="hidden" id="chatApp" style="flex-direction:column; height:100vh;">
+  <header>🤖 Gemini ChatBot Ultimate</header>
+  <div id="chatBox"></div>
+  <div id="inputArea">
+    <input type="text" id="messageInput" placeholder="Tulis pesan...">
+    <button onclick="sendMessage()">Kirim</button>
+  </div>
+</div>
+
+<script>
+  const DEFAULT_API_KEY = "AIzaSyBYmsmqVHHnio0i7TOLAXmYSsU3UNOhd3o";
+  let currentUser = null;
+  const suara = new SpeechSynthesisUtterance(); suara.lang = 'id-ID';
+
+  const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+  function saveUsers() {
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+
+  function showRegister() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("registerPage").classList.remove("hidden");
+  }
+
+  function showLogin() {
+    document.getElementById("registerPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+  }
+
+  function register() {
+    const u = document.getElementById("regUser").value.trim();
+    const p = document.getElementById("regPass").value;
+    if (users[u]) {
+      document.getElementById("registerError").style.display = "block";
+      return;
+    }
+    users[u] = { password: p, premium: false };
+    saveUsers();
+    alert("✅ Berhasil daftar! Silakan login.");
+    showLogin();
+  }
+
+  function login() {
+    const u = document.getElementById("loginUser").value.trim();
+    const p = document.getElementById("loginPass").value;
+
+    if (u === "annas" && p === "annas") {
+      loadUserTable();
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      return;
     }
 
-    function login() {
-      const u = document.getElementById("username").value.trim();
-      const p = document.getElementById("password").value.trim();
-      const key = document.getElementById("apikey").value.trim();
-
-      if (u === "annas" && p === "annas") {
-        alert("Login Admin Sukses!");
-        showAdminPanel();
-        return;
-      }
-
-      const userExist = USERS_DB.find(user => user.username === u);
-
-      if (userExist && userExist.password === p && key.startsWith("AIza")) {
-        currentUser = userExist;
-        isPremium = userExist.premium;
-        GEMINI_API_KEY = key;
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("chatApp").style.display = "flex";
-        document.getElementById("userStatus").innerHTML = `Gemini ChatBot 🤖 (${u}${isPremium ? '<span class='badge'>Premium</span>' : ''})`;
-        loadHistory(u);
-      } else if (!userExist) {
-        if (!u || !p || !key) return alert("Lengkapi semua data!");
-        if (USERS_DB.find(user => user.username === u)) return alert("❌ Nama sudah dipakai!");
-        USERS_DB.push({ username: u, password: p, premium: false });
-        localStorage.setItem("usersDB", JSON.stringify(USERS_DB));
-        alert("✅ Akun berhasil dibuat. Silakan login ulang.");
-      } else {
-        document.getElementById("loginError").style.display = "block";
-      }
+    if (!users[u] || users[u].password !== p) {
+      document.getElementById("loginError").style.display = "block";
+      return;
     }
 
-    function saveHistory(user) {
-      localStorage.setItem(`riwayat_${user}`, document.getElementById("chatBox").innerHTML);
-    }
+    currentUser = u;
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("chatApp").classList.remove("hidden");
+    loadHistory();
+  }
 
-    function loadHistory(user) {
-      const saved = localStorage.getItem(`riwayat_${user}`);
-      if (saved) document.getElementById("chatBox").innerHTML = saved;
-    }
+  function logout() {
+    location.reload();
+  }
 
-    async function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const teks = input.value.trim();
-      if (!teks) return;
-      renderMsg("user", teks);
-      input.value = "";
-      typeSound.play();
-      saveHistory(currentUser.username);
-      await kirimKeGemini(teks);
-    }
+  function upgradeUser(username) {
+    users[username].premium = true;
+    saveUsers();
+    loadUserTable();
+  }
 
-    function renderMsg(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = `msg ${sender}`;
-      const label = document.createElement("div");
-      label.className = "sender-label";
-      label.textContent = sender === "user" ? "Kamu" : "Gemini";
-      const body = document.createElement("div");
-      body.innerHTML = text + (sender === "bot" ? ' <span style="color:#00e5ff;">✔️</span>' : "");
-      msg.appendChild(label);
-      msg.appendChild(body);
-      const box = document.getElementById("chatBox");
-      box.appendChild(msg);
-      box.scrollTop = box.scrollHeight;
-    }
+  function loadUserTable() {
+    const tbody = document.querySelector("#userTable tbody");
+    tbody.innerHTML = "";
+    Object.keys(users).forEach(user => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${user}</td>
+        <td>${users[user].premium ? 'Premium' : 'Gratis'}</td>
+        <td>${users[user].premium ? '-' : `<button onclick="upgradeUser('${user}')">Setujui Premium</button>`}</td>`;
+      tbody.appendChild(row);
+    });
+  }
 
-    async function kirimKeGemini(pesan) {
-      const typing = document.getElementById("typingIndicator");
-      typing.style.display = "block";
-      try {
-        if (!isPremium && pesan.length > 20) {
-          renderMsg("bot", "⚠️ Hanya pengguna Premium bisa mengirim pesan panjang.");
-          return;
-        }
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ contents: [{ parts: [{ text: pesan }] }] })
-        });
-        const data = await res.json();
-        let jawaban = data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ Tidak ada balasan.";
-        let terjemahan = await translateToIndo(jawaban);
-        renderMsg("bot", terjemahan);
-        suara.text = terjemahan;
-        speechSynthesis.speak(suara);
-        notifSound.play();
-      } catch (e) {
-        renderMsg("bot", "❌ Gagal menghubungi API");
-      } finally {
-        typing.style.display = "none";
-        saveHistory(currentUser.username);
-      }
-    }
+  function renderMsg(sender, text) {
+    const chatBox = document.getElementById("chatBox");
+    const msg = document.createElement("div");
+    msg.className = `msg ${sender}`;
+    const label = document.createElement("div");
+    label.className = "sender-label";
+    label.textContent = sender === "user" ? currentUser : "Gemini";
+    const body = document.createElement("div");
+    body.innerHTML = text;
+    msg.appendChild(label);
+    msg.appendChild(body);
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-    async function translateToIndo(text) {
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|id`);
-        const data = await res.json();
-        return data?.responseData?.translatedText || text;
-      } catch {
-        return text;
-      }
-    }
+  function saveHistory() {
+    localStorage.setItem("chat_" + currentUser, document.getElementById("chatBox").innerHTML);
+  }
 
-    function showAdminPanel() {
-      let html = '<div style="padding:20px;color:white"><h2>👑 Admin Panel</h2><ul>';
-      USERS_DB.forEach((u, i) => {
-        html += `<li>${u.username} (${u.premium ? 'Premium' : 'Free'}) <button onclick="upgrade(${i})">Upgrade</button></li>`;
-      });
-      html += '</ul></div>';
-      document.body.innerHTML = html;
-    }
+  function loadHistory() {
+    const saved = localStorage.getItem("chat_" + currentUser);
+    if (saved) document.getElementById("chatBox").innerHTML = saved;
+  }
 
-    function upgrade(i) {
-      USERS_DB[i].premium = true;
-      localStorage.setItem("usersDB", JSON.stringify(USERS_DB));
-      alert("✅ Berhasil upgrade user ke Premium");
-      showAdminPanel();
-    }
-  </script></body>
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const teks = input.value.trim();
+    if (!teks) return;
+    renderMsg("user", teks);
+    input.value = "";
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${DEFAULT_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: teks }] }] })
+    });
+    const data = await res.json();
+    const balasan = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Tidak ada balasan dari AI.";
+    renderMsg("bot", balasan);
+    suara.text = balasan;
+    speechSynthesis.speak(suara);
+    saveHistory();
+  }
+
+  document.getElementById("messageInput").addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
+</body>
 </html>
